@@ -23,7 +23,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
-  const firebaseConfig = {
+     
+       
+
+        // Firebase configuration
+        const firebaseConfig = {
             apiKey: "AIzaSyD0xLuJlNiWr9-VvPOSxeYKXdfxzf1OZHM",
             authDomain: "do-to-list-aa1eb.firebaseapp.com",
             projectId: "do-to-list-aa1eb",
@@ -33,8 +37,9 @@
             databaseURL: "https://do-to-list-aa1eb-default-rtdb.firebaseio.com"
         };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
     const gallery = document.getElementById('gallery');
     const lightbox = document.getElementById('lightbox');
