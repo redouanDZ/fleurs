@@ -3,14 +3,11 @@
   directory = "netlify/functions"
 
 [build]
-  base = "client"
-  publish = "client/dist"
-  command = "npm install && npm run build"
-
-[build.environment]
-  NODE_VERSION = "18.20.3"
+  publish = "public"  # مجلد الملفات النهائي
+  command = ""        # لا حاجة لأمر build
 
 [[redirects]]
   from = "/admin/*"
   to = "/admin/index.html"
   status = 200
+
