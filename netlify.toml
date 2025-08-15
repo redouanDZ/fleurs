@@ -1,13 +1,11 @@
-
 [functions]
   node_bundler = "esbuild"
   directory = "netlify/functions"
 
 [build]
-  base = "client"     # or the folder where package.json is
-  publish = "client/dist"  # change to your build output folder
+  base = "client"
+  publish = "client/dist"
   command = "npm install && npm run build"
-
 
 [[redirects]]
   from = "/admin/*"
@@ -15,4 +13,4 @@
   status = 200
 
 [build.environment]
-  NODE_VERSION = "18.20.3" # use your project's required Node version
+  NODE_VERSION = "18.20.3"
