@@ -5,15 +5,15 @@ import { getDatabase, ref, push, set, onValue, update, remove } from "https://ww
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 // ====== Firebase ======
-const firebaseConfig = {
-  apiKey: window._ENV?.FIREBASE_API_KEY || "${FIREBASE_API_KEY}",
-  authDomain: window._ENV?.FIREBASE_AUTH_DOMAIN || "${FIREBASE_AUTH_DOMAIN}",
-  databaseURL: window._ENV?.FIREBASE_DB_URL || "${FIREBASE_DB_URL}",
-  projectId: window._ENV?.FIREBASE_PROJECT_ID || "${FIREBASE_PROJECT_ID}",
-  storageBucket: window._ENV?.FIREBASE_STORAGE_BUCKET || "${FIREBASE_STORAGE_BUCKET}",
-  messagingSenderId: window._ENV?.FIREBASE_SENDER_ID || "${FIREBASE_SENDER_ID}",
-  appId: window._ENV?.FIREBASE_APP_ID || "${FIREBASE_APP_ID}",
-};
+  const firebaseConfig = {
+            apiKey: "AIzaSyD0xLuJlNiWr9-VvPOSxeYKXdfxzf1OZHM",
+            authDomain: "do-to-list-aa1eb.firebaseapp.com",
+            projectId: "do-to-list-aa1eb",
+            storageBucket: "do-to-list-aa1eb.firebasestorage.app",
+            messagingSenderId: "518478895264",
+            appId: "1:518478895264:web:cbcba241dcd91c3ff651c5",
+            databaseURL: "https://do-to-list-aa1eb-default-rtdb.firebaseio.com"
+        };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -23,9 +23,9 @@ const provider = new GoogleAuthProvider();
 
 // ====== ImageKit ======
 const imagekit = new ImageKit({
-  publicKey: "${IMAGEKIT_PUBLIC_KEY}",
-  urlEndpoint: "${IMAGEKIT_URL_ENDPOINT}",
-  authenticationEndpoint: "/.netlify/functions/imagekit-auth",
+ publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+ urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+ authenticationEndpoint: "/.netlify/functions/imagekit-auth",
 });
   
 // دالة تسجيل الدخول
