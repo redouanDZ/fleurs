@@ -85,10 +85,7 @@ onAuthStateChanged(auth, (user)=>{
   }
 });
 
-googleBtn?.addEventListener("click", async ()=>{
-  try{ await signInWithPopup(auth, provider); }
-  catch(err){ setAuthError(err.message); }
-});
+
 
 emailForm?.addEventListener("submit", async (e)=>{
   e.preventDefault();
