@@ -3,10 +3,10 @@
   directory = "netlify/functions"
 
 [build]
-  publish = "public"  # مجلد الملفات النهائي
-  command = ""        # لا حاجة لأمر build
+  publish = "public"  # Best practice - only publish what's needed
+  command = "npm run build"  # Add your build command if you have one
 
 [[redirects]]
   from = "/admin/*"
-  to = "/.netlify/functions/admin"
+  to = "/admin/index.html"
   status = 200
