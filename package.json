@@ -1,0 +1,23 @@
+{
+  "name": "l_javascript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redouanDZ/fleurs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/redouanDZ/fleurs/issues"
+  },
+  "homepage": "https://github.com/redouanDZ/fleurs#readme",
+  "dependencies": {
+    "imagekit": "^6.0.0"
+  }
+}
