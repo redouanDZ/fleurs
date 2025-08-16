@@ -22,17 +22,11 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // ====== ImageKit ======
-let imagekit;
-try {
-    imagekit = new ImageKit({
-        publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
-        urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
-        authenticationEndpoint: window.location.origin + "/.netlify/functions/imagekit-auth",
-    });
-} catch (err) {
-    console.error("Failed to initialize ImageKit:", err);
-    // Handle initialization error appropriately
-}
+const imagekit = new ImageKit({
+    publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+    urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+    authenticationEndpoint: "https://your-site-name.netlify.app/.netlify/functions/imagekit-auth"
+});
 
   
 // دالة تسجيل الدخول
@@ -155,8 +149,8 @@ uploadBtn?.addEventListener("click", async ()=>{
         file,
         fileName: file.name,
         useUniqueFileName: true,
-        tags: ["flowersdz"],
-        folder: "/flowersdz",
+        tags: ["fleursdz"],
+        folder: "/fleursdz",
         progress: (evt) => { if(evt && evt.loaded && evt.total){ bar.style.width = Math.round((evt.loaded/evt.total)*100) + '%'; } }
       });
 

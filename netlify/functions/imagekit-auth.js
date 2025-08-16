@@ -4,9 +4,9 @@ const ImageKit = require("imagekit");
 exports.handler = async function (event, context) {
   try {
     const imagekit = new ImageKit({
-      publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+      privateKey: "private_uCCV************************",
+      urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
     });
 
     const authenticationParameters = imagekit.getAuthenticationParameters();

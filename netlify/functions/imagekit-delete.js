@@ -10,11 +10,11 @@ exports.handler = async function (event, context) {
     const { fileId } = JSON.parse(event.body || "{}");
     if (!fileId) return { statusCode: 400, body: "fileId required" };
 
-    const imagekit = new ImageKit({
-      publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-    });
+      const imagekit = new ImageKit({
+         publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+         privateKey: "private_uCCV************************",
+         urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+       });
 
     await imagekit.deleteFile(fileId);
 
