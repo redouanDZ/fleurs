@@ -22,11 +22,18 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // ====== ImageKit ======
-const imagekit = new ImageKit({
- publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
- urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
- authenticationEndpoint: "/.netlify/functions/imagekit-auth",
-});
+let imagekit;
+try {
+    imagekit = new ImageKit({
+        publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+        urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+        authenticationEndpoint: window.location.origin + "/.netlify/functions/imagekit-auth",
+    });
+} catch (err) {
+    console.error("Failed to initialize ImageKit:", err);
+    // Handle initialization error appropriately
+}
+
   
 // دالة تسجيل الدخول
 function loginWithGoogle() {
