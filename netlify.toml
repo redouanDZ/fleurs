@@ -1,11 +1,9 @@
 [build]
   publish = "public"
-  command = "npm run build"  # Si vous avez un build step
-
+  command = "npm run build"
 [functions]
   directory = ".netlify/functions"
   node_bundler = "esbuild"
-
 [[redirects]]
   from = "/admin/*"
   to = "/admin/index.html"

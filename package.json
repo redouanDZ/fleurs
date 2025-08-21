@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo 'No build needed'"
+    "build": "esbuild public/admin/app.js --bundle --outfile=public/admin/app.bundle.js --format=esm --minify"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,10 @@
   },
   "homepage": "https://github.com/redouanDZ/fleurs#readme",
   "dependencies": {
-    "imagekit": "^6.0.0"
+    "imagekit": "^6.0.0",
+    "imagekit-javascript": "^4.0.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5"
   }
 }

@@ -1,4 +1,4 @@
-// Note: No import for ImageKit; loaded via <script> tag in HTML
+import ImageKit from "imagekit-javascript";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -28,12 +28,15 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // Initialize ImageKit
-if (!window.ImageKit) {
-    console.error("ImageKit library not loaded. Ensure the script tag is included in HTML.");
-    alert("فشل تحميل مكتبة ImageKit. الرجاء التحقق من الاتصال.");
-    throw new Error("ImageKit library not loaded");
+let imagekit;
+try {
+    imagekit = new ImageKit(imageKitConfig);
+    console.log("ImageKit initialized successfully");
+} catch (err) {
+    console.error("Failed to initialize ImageKit:", err);
+    alert("فشل تحميل مكتبة ImageKit. الرجاء التحقق من الإعدادات.");
+    throw err;
 }
-const imagekit = new window.ImageKit(imageKitConfig);
 
 // DOM Elements
 const elements = {
@@ -159,35 +162,43 @@ const mediaFunctions = {
         elements.uploadList.prepend(row);
 
         try {
-            // Debug authentication parameters
+            // Fetch authentication parameters
+            console.log("Fetching auth parameters from:", imageKitConfig.authenticationEndpoint);
             const authResponse = await fetch(imageKitConfig.authenticationEndpoint, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             });
             if (!authResponse.ok) {
-                throw new Error(`Authentication endpoint failed: ${authResponse.statusText}`);
+                throw new Error(`Authentication endpoint failed: ${authResponse.status} ${authResponse.statusText}`);
             }
             const authParams = await authResponse.json();
-            console.log("Auth params:", authParams);
+            console.log("Auth params received:", authParams);
 
-            if (!authParams.token || !authParams.signature) {
-                throw new Error("Invalid authentication parameters from endpoint");
+            if (!authParams.token || !authParams.signature || !authParams.expire) {
+                throw new Error("Invalid authentication parameters: missing token, signature, or expire");
             }
 
+            // Manually pass authentication parameters to upload
+            console.log("Attempting upload to ImageKit with file:", file.name);
             const result = await imagekit.upload({
                 file,
                 fileName: file.name,
                 useUniqueFileName: true,
                 tags: ["fleursdz"],
                 folder: "/fleursdz",
+                token: authParams.token,
+                expire: authParams.expire,
+                signature: authParams.signature,
                 progress: (evt) => {
                     if (evt && evt.loaded && evt.total) {
-                        bar.style.width = `${Math.round((evt.loaded / evt.total) * 100)}%`;
+                        const percent = Math.round((evt.loaded / evt.total) * 100);
+                        bar.style.width = `${percent}%`;
+                        console.log(`Upload progress for ${file.name}: ${percent}%`);
                     }
                 }
             });
 
-            console.log("Upload result:", result);
+            console.log("Upload successful, result:", result);
 
             await push(mediaRef, {
                 url: result.url,
@@ -201,7 +212,7 @@ const mediaFunctions = {
             bar.style.width = '100%';
             errorEl.style.display = 'none';
         } catch (err) {
-            console.error("Upload error:", err);
+            console.error("Upload error for file", file.name, ":", err);
             row.classList.add('border-danger');
             errorEl.textContent = `فشل الرفع: ${err.message}`;
             errorEl.style.display = 'block';

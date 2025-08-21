@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ImageKit Upload</title>
+</head>
 <body>
     <input type="file" id="fileInput">
-    <script src="https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js"></script>
-    <script>
-        if (!window.ImageKit) {
-            console.error("ImageKit not loaded");
-            alert("Failed to load ImageKit library");
-        }
-        const imagekit = new window.ImageKit({
+    <div id="error" style="color: red;"></div>
+    <script type="module">
+        import ImageKit from "/node_modules/imagekit-javascript/dist/imagekit.min.js";
+        const imagekit = new ImageKit({
             publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
             urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
             authenticationEndpoint: "https://fleursdz.netlify.app/.netlify/functions/imagekit-auth"
@@ -16,6 +18,12 @@
         document.getElementById("fileInput").addEventListener("change", async () => {
             const file = document.getElementById("fileInput").files[0];
             try {
+                const authResponse = await fetch("https://fleursdz.netlify.app/.netlify/functions/imagekit-auth");
+                const authParams = await authResponse.json();
+                console.log("Auth params:", authParams);
+                if (!authParams.token || !authParams.signature || !authParams.expire) {
+                    throw new Error("Invalid auth parameters");
+                }
                 const result = await imagekit.upload({
                     file,
                     fileName: file.name,
@@ -23,11 +31,12 @@
                     tags: ["fleursdz"]
                 });
                 console.log("Upload successful:", result);
+                document.getElementById("error").textContent = "Upload successful!";
             } catch (err) {
                 console.error("Upload failed:", err);
+                document.getElementById("error").textContent = `Upload failed: ${err.message}`;
             }
         });
     </script>
-    
 </body>
 </html>
