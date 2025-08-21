@@ -1,4 +1,4 @@
-import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.esm.js";
+import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.6.0/dist/imagekit.esm.js"; // Updated to 1.6.0
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -69,6 +69,7 @@ const utils = {
             <div class="progress">
                 <div class="progress-bar" style="width:0%"></div>
             </div>
+            <div class="error text-danger mt-1" style="display:none;"></div>
         `;
         return row;
     }
@@ -82,7 +83,10 @@ const authFunctions = {
         
         method(auth, provider)
             .then(result => console.log("User signed in:", result.user))
-            .catch(err => console.error(`${isLocal ? "Redirect" : "Popup"} Error:`, err));
+            .catch(err => {
+                console.error(`${isLocal ? "Redirect" : "Popup"} Error:`, err);
+                utils.setAuthError("فشل تسجيل الدخول باستخدام جوجل.");
+            });
     },
 
     handleAuthState: (user) => {
@@ -102,6 +106,7 @@ const authFunctions = {
         try {
             await signInWithEmailAndPassword(auth, elements.emailInput.value, elements.passInput.value);
         } catch (err) {
+            console.error("Email login error:", err);
             utils.setAuthError("فشل تسجيل الدخول. تأكد من البريد وكلمة المرور.");
         }
     }
@@ -145,9 +150,22 @@ const mediaFunctions = {
     uploadFile: async (file) => {
         const row = utils.createProgressRow(file);
         const bar = row.querySelector('.progress-bar');
+        const errorEl = row.querySelector('.error');
         elements.uploadList.prepend(row);
 
         try {
+            // Debug authentication parameters
+            const authResponse = await fetch(imageKitConfig.authenticationEndpoint, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const authParams = await authResponse.json();
+            console.log("Auth params:", authParams);
+
+            if (!authParams.token || !authParams.signature) {
+                throw new Error("Invalid authentication parameters");
+            }
+
             const result = await imagekit.upload({
                 file,
                 fileName: file.name,
@@ -161,6 +179,8 @@ const mediaFunctions = {
                 }
             });
 
+            console.log("Upload result:", result);
+
             await push(mediaRef, {
                 url: result.url,
                 fileId: result.fileId,
@@ -171,9 +191,13 @@ const mediaFunctions = {
             });
 
             bar.style.width = '100%';
+            errorEl.style.display = 'none';
         } catch (err) {
-            console.error(err);
+            console.error("Upload error:", err);
             row.classList.add('border-danger');
+            errorEl.textContent = `فشل الرفع: ${err.message}`;
+            errorEl.style.display = 'block';
+            throw err;
         }
     },
 
@@ -193,7 +217,7 @@ const mediaFunctions = {
                 e.target.textContent = 'حفظ';
             }, 800);
         } catch (err) {
-            console.error(err);
+            console.error("Save alt error:", err);
             alert('فشل حفظ التعديلات');
         }
     },
@@ -208,16 +232,19 @@ const mediaFunctions = {
 
         try {
             if (fileId) {
-                await fetch('/.netlify/functions/imagekit-delete', {
+                const response = await fetch('/.netlify/functions/imagekit-delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fileId })
                 });
+                if (!response.ok) {
+                    throw new Error('Failed to delete file from ImageKit');
+                }
             }
             await remove(ref(db, `media/${key}`));
         } catch (err) {
-            console.error(err);
-            alert('تعذر الحذف');
+            console.error("Delete error:", err);
+            alert('تعذر الحذف: ' + err.message);
         }
     }
 };
@@ -252,10 +279,21 @@ const setupEventListeners = () => {
     elements.uploadBtn?.addEventListener("click", async () => {
         if (!auth.currentUser) return alert("تحتاج لتسجيل الدخول");
         if (!elements.fileInput.files.length) return alert("اختر ملفات أولاً");
-        
+
         const files = Array.from(elements.fileInput.files);
+        const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+        for (const file of files) {
+            if (!utils.isImage(file) && !utils.isVideo(file)) {
+                alert(`نوع الملف غير مدعوم: ${file.name}`);
+                return;
+            }
+            if (file.size > MAX_FILE_SIZE) {
+                alert(`الملف ${file.name} يتجاوز الحد الأقصى 25 ميجابايت`);
+                return;
+            }
+        }
+
         await Promise.all(files.map(file => mediaFunctions.uploadFile(file)));
-        
         elements.fileInput.value = "";
     });
 
