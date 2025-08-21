@@ -12,7 +12,7 @@ exports.handler = async function (event, context) {
 
       const imagekit = new ImageKit({
          publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
-         privateKey: "private_uCCV************************",
+         privateKey: "private_uCCVTSrsRkNy1oSNQns3j7TebWY=",
          urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
        });
 
