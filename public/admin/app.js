@@ -1,4 +1,4 @@
-import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js"; // Reverted to 1.5.4
+// Removed: import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -27,8 +27,8 @@ const mediaRef = ref(db, "media");
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Initialize ImageKit
-const imagekit = new ImageKit(imageKitConfig);
+// Initialize ImageKit (using global window.ImageKit)
+const imagekit = new window.ImageKit(imageKitConfig);
 
 // DOM Elements
 const elements = {
