@@ -1,4 +1,4 @@
-import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.6.0/dist/imagekit.esm.js"; // Updated to 1.6.0
+import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js"; // Reverted to 1.5.4
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -163,7 +163,7 @@ const mediaFunctions = {
             console.log("Auth params:", authParams);
 
             if (!authParams.token || !authParams.signature) {
-                throw new Error("Invalid authentication parameters");
+                throw new Error("Invalid authentication parameters from endpoint");
             }
 
             const result = await imagekit.upload({
