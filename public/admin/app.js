@@ -1,4 +1,4 @@
-// Removed: import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js";
+// Note: No import for ImageKit; loaded via <script> tag in HTML
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
@@ -27,7 +27,12 @@ const mediaRef = ref(db, "media");
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// Initialize ImageKit (using global window.ImageKit)
+// Initialize ImageKit
+if (!window.ImageKit) {
+    console.error("ImageKit library not loaded. Ensure the script tag is included in HTML.");
+    alert("فشل تحميل مكتبة ImageKit. الرجاء التحقق من الاتصال.");
+    throw new Error("ImageKit library not loaded");
+}
 const imagekit = new window.ImageKit(imageKitConfig);
 
 // DOM Elements
@@ -159,6 +164,9 @@ const mediaFunctions = {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
             });
+            if (!authResponse.ok) {
+                throw new Error(`Authentication endpoint failed: ${authResponse.statusText}`);
+            }
             const authParams = await authResponse.json();
             console.log("Auth params:", authParams);
 
@@ -238,7 +246,7 @@ const mediaFunctions = {
                     body: JSON.stringify({ fileId })
                 });
                 if (!response.ok) {
-                    throw new Error('Failed to delete file from ImageKit');
+                    throw new Error(`Failed to delete file from ImageKit: ${response.statusText}`);
                 }
             }
             await remove(ref(db, `media/${key}`));

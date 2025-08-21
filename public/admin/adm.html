@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <input type="file" id="fileInput">
+    <script src="https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.min.js"></script>
+    <script>
+        if (!window.ImageKit) {
+            console.error("ImageKit not loaded");
+            alert("Failed to load ImageKit library");
+        }
+        const imagekit = new window.ImageKit({
+            publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+            urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+            authenticationEndpoint: "https://fleursdz.netlify.app/.netlify/functions/imagekit-auth"
+        });
+        document.getElementById("fileInput").addEventListener("change", async () => {
+            const file = document.getElementById("fileInput").files[0];
+            try {
+                const result = await imagekit.upload({
+                    file,
+                    fileName: file.name,
+                    folder: "/fleursdz",
+                    tags: ["fleursdz"]
+                });
+                console.log("Upload successful:", result);
+            } catch (err) {
+                console.error("Upload failed:", err);
+            }
+        });
+    </script>
+    
+</body>
+</html>
