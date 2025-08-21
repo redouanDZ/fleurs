@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageKit Media Uploader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-container {
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            margin-bottom: 10px;
+        }
+        .progress-container {
+            margin-top: 20px;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .media-preview {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .media-item {
+            position: relative;
+            width: 200px;
+        }
+        .media-item img, .media-item video {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .media-type {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Media to ImageKit</h1>
+    
+    <div class="upload-container" id="dropzone">
+        <p>Drag and drop files here or click to select</p>
+        <input type="file" id="fileInput" class="file-input" multiple accept="image/*,video/*">
+    </div>
+    
+    <div class="progress-container" id="progressContainer" style="display: none;">
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+        <div id="progressText">0%</div>
+    </div>
+    
+    <div class="error-message" id="errorMessage"></div>
+    
+    <div class="media-preview" id="mediaPreview"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.esm.js" type="module"></script>
+    <script type="module">
+        import ImageKit from "https://cdn.jsdelivr.net/npm/imagekit-javascript@1.5.4/dist/imagekit.esm.js";
+        
+        // Initialize ImageKit
+        const imagekit = new ImageKit({
+            publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+            urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
+            authenticationEndpoint: "https://fleursdz.netlify.app/.netlify/functions/imagekit-auth"
+        });
+        
+        // DOM Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const errorMessage = document.getElementById('errorMessage');
+        const mediaPreview = document.getElementById('mediaPreview');
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            setTimeout(() => {
+                errorMessage.textContent = '';
+            }, 5000);
+        }
+        
+        // Add media to preview
+        function addMediaToPreview(url, type) {
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'media-item';
+            
+            const typeLabel = document.createElement('div');
+            typeLabel.className = 'media-type';
+            typeLabel.textContent = type === 'video' ? 'Video' : 'Image';
+            
+            if (type === 'video') {
+                const video = document.createElement('video');
+                video.src = url;
+                video.controls = true;
+                mediaItem.appendChild(video);
+            } else {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Uploaded image';
+                mediaItem.appendChild(img);
+            }
+            
+            mediaItem.appendChild(typeLabel);
+            mediaPreview.appendChild(mediaItem);
+        }
+        
+        // Handle file upload
+        async function uploadFile(file) {
+            try {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+                
+                const fileName = file.name.split('.').slice(0, -1).join('.');
+                const extension = file.name.split('.').pop();
+                const fileType = file.type.startsWith('video/') ? 'video' : 'image';
+                
+                const result = await imagekit.upload({
+                    file: file,
+                    fileName: `${fileName}_${Date.now()}.${extension}`,
+                    useUniqueFileName: false,
+                    tags: ["media-upload"],
+                    folder: "/uploads",
+                    progress: (progress) => {
+                        const percentCompleted = Math.round((progress.loaded / progress.total) * 100);
+                        progressBar.style.width = `${percentCompleted}%`;
+                        progressText.textContent = `${percentCompleted}%`;
+                    }
+                });
+                
+                // Add to preview
+                addMediaToPreview(result.url, fileType);
+                
+                // Reset progress
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    progressBar.style.width = '0%';
+                    progressText.textContent = '0%';
+                }, 1000);
+                
+                return result;
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError(`Upload failed: ${error.message}`);
+                progressContainer.style.display = 'none';
+                throw error;
+            }
+        }
+        
+        // Handle multiple file uploads
+        async function handleFiles(files) {
+            const fileArray = Array.from(files);
+            
+            for (const file of fileArray) {
+                if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                    showError(`Unsupported file type: ${file.type}`);
+                    continue;
+                }
+                
+                try {
+                    await uploadFile(file);
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                }
+            }
+        }
+        
+        // Event Listeners
+        dropzone.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+        
+        // Drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropzone.style.backgroundColor = '#f0f0f0';
+        }
+        
+        function unhighlight() {
+            dropzone.style.backgroundColor = '';
+        }
+        
+        dropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+    </script>
+</body>
+</html>
