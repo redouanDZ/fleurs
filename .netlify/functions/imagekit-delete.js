@@ -11,8 +11,8 @@ exports.handler = async function (event, context) {
     if (!fileId) return { statusCode: 400, body: "fileId required" };
 
       const imagekit = new ImageKit({
-         publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
-         privateKey: "private_uCCVTSrsRkNy1oSNQns3j7TebWY=",
+         publicKey: "public_6ENsnXgqfyQ+XiQQkzXbVrieVEk=",
+         privateKey: "private_XRZlyiDiv47crsmjXMCtIktACtU=",
          urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
        });
 

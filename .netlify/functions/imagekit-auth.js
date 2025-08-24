@@ -20,13 +20,13 @@ exports.handler = async function (event, context) {
     }
 
     const imagekit = new ImageKit({
-      publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+      publicKey: "public_6ENsnXgqfyQ+XiQQkzXbVrieVEk=",
       privateKey: privateKey,
       urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
     });
 
-    // Generate Unix timestamp for 2 hours from now
-    const expire = Math.floor(Date.now() / 1000) + 7200;
+    // Set expire to current time + 30 minutes (1800 seconds)
+    const expire = Math.floor(Date.now() / 1000) + 1800;
     const authenticationParameters = imagekit.getAuthenticationParameters(null, expire);
     console.log("Generated auth parameters:", authenticationParameters);
 

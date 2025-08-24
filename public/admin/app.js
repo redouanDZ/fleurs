@@ -15,7 +15,7 @@ const firebaseConfig = {
 };
 
 const imageKitConfig = {
-    publicKey: "public_aF1VLWznWZonCwPUp2VzFSZFFjw=",
+    publicKey: "public_6ENsnXgqfyQ+XiQQkzXbVrieVEk=",
     urlEndpoint: "https://ik.imagekit.io/rkndkbsiy",
     authenticationEndpoint: "https://fleursdz.netlify.app/.netlify/functions/imagekit-auth"
 };
@@ -155,71 +155,50 @@ const mediaFunctions = {
         });
     },
 
-    uploadFile: async (file) => {
-        const row = utils.createProgressRow(file);
-        const bar = row.querySelector('.progress-bar');
-        const errorEl = row.querySelector('.error');
-        elements.uploadList.prepend(row);
+uploadFile: async (file) => {
+    const row = utils.createProgressRow(file);
+    const bar = row.querySelector('.progress-bar');
+    const errorEl = row.querySelector('.error');
+    elements.uploadList.prepend(row);
 
-        try {
-            // Fetch authentication parameters
-            console.log("Fetching auth parameters from:", imageKitConfig.authenticationEndpoint);
-            const authResponse = await fetch(imageKitConfig.authenticationEndpoint, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            if (!authResponse.ok) {
-                throw new Error(`Authentication endpoint failed: ${authResponse.status} ${authResponse.statusText}`);
-            }
-            const authParams = await authResponse.json();
-            console.log("Auth params received:", authParams);
-
-            if (!authParams.token || !authParams.signature || !authParams.expire) {
-                throw new Error("Invalid authentication parameters: missing token, signature, or expire");
-            }
-
-            // Manually pass authentication parameters to upload
-            console.log("Attempting upload to ImageKit with file:", file.name);
-            const result = await imagekit.upload({
-                file,
-                fileName: file.name,
-                useUniqueFileName: true,
-                tags: ["fleursdz"],
-                folder: "/fleursdz",
-                token: authParams.token,
-                expire: authParams.expire,
-                signature: authParams.signature,
-                progress: (evt) => {
-                    if (evt && evt.loaded && evt.total) {
-                        const percent = Math.round((evt.loaded / evt.total) * 100);
-                        bar.style.width = `${percent}%`;
-                        console.log(`Upload progress for ${file.name}: ${percent}%`);
-                    }
+    try {
+        console.log("Attempting upload to ImageKit with file:", file.name);
+        const result = await imagekit.upload({
+            file,
+            fileName: file.name,
+            useUniqueFileName: true,
+            tags: ["fleursdz"],
+            folder: "/fleursdz",
+            progress: (evt) => {
+                if (evt && evt.loaded && evt.total) {
+                    const percent = Math.round((evt.loaded / evt.total) * 100);
+                    bar.style.width = `${percent}%`;
+                    console.log(`Upload progress for ${file.name}: ${percent}%`);
                 }
-            });
+            }
+        });
 
-            console.log("Upload successful, result:", result);
+        console.log("Upload successful, result:", result);
 
-            await push(mediaRef, {
-                url: result.url,
-                fileId: result.fileId,
-                type: utils.isVideo(file) ? "video" : "image",
-                alt: elements.defaultAlt.value || utils.getFileName(file),
-                order: Date.now(),
-                uid: auth.currentUser.uid
-            });
+        await push(mediaRef, {
+            url: result.url,
+            fileId: result.fileId,
+            type: utils.isVideo(file) ? "video" : "image",
+            alt: elements.defaultAlt.value || utils.getFileName(file),
+            order: Date.now(),
+            uid: auth.currentUser.uid
+        });
 
-            bar.style.width = '100%';
-            errorEl.style.display = 'none';
-        } catch (err) {
-            console.error("Upload error for file", file.name, ":", err);
-            row.classList.add('border-danger');
-            errorEl.textContent = `فشل الرفع: ${err.message}`;
-            errorEl.style.display = 'block';
-            throw err;
-        }
-    },
-
+        bar.style.width = '100%';
+        errorEl.style.display = 'none';
+    } catch (err) {
+        console.error("Upload error for file", file.name, ":", err);
+        row.classList.add('border-danger');
+        errorEl.textContent = `فشل الرفع: ${err.message}`;
+        errorEl.style.display = 'block';
+        throw err;
+    }
+},
     handleSaveAlt: async (e) => {
         if (!e.target.classList.contains('save') || !auth.currentUser) return;
         
