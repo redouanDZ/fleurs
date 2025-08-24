@@ -202,7 +202,7 @@
     <script src="https://unpkg.com/imagekit-javascript@1.5.4/dist/imagekit.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD0xLuJlNiWr9-VvPOSxeYKXdfxzf1OZHM",
@@ -216,6 +216,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        let products = []; // Store products globally
 
         const imagekit = new ImageKit({
             publicKey: "public_3ilExDDMNoP8NGzReSuLdXCORyQ=",
@@ -231,24 +232,28 @@
 
         function loadProducts() {
             const productsContainer = document.getElementById('products-container');
-            productsContainer.innerHTML = '';
+            productsContainer.innerHTML = '<p class="text-center">جاري تحميل المنتجات...</p>';
             const mediaRef = ref(db, 'media');
             onValue(mediaRef, (snapshot) => {
                 productsContainer.innerHTML = '';
-                const products = [];
+                products = [];
+                if (!snapshot.exists()) {
+                    productsContainer.innerHTML = '<p class="text-center">لا توجد منتجات متاحة حاليًا.</p>';
+                    return;
+                }
                 snapshot.forEach((childSnapshot) => {
                     const data = childSnapshot.val();
                     if (data.type === 'image') {
                         products.push({
                             id: childSnapshot.key,
                             name: data.alt || 'باقة زهور',
-                            price: 49.99, // Default price, adjust as needed
-                            description: 'باقة زهور اصطناعية أنيقة لجميع المناسبات',
+                            price: data.price || 49.99, // Use stored price or default
+                            description: data.description || 'باقة زهور اصطناعية أنيقة لجميع المناسبات',
                             imagePath: data.filePath || data.url.replace('https://ik.imagekit.io/rkndkbsiy', '')
                         });
                     }
                 });
-                products.sort((a, b) => (b.order || 0) - (a.order || 0)); // Sort by order
+                products.sort((a, b) => (b.order || 0) - (a.order || 0));
                 products.forEach(product => {
                     const imageUrl = imagekit.url({
                         path: product.imagePath,
@@ -277,14 +282,16 @@
                 setupOrderButtonListeners();
             }, (error) => {
                 console.error('Error fetching products:', error);
+                productsContainer.innerHTML = '<p class="text-center">خطأ في تحميل المنتجات. حاول لاحقًا.</p>';
                 showToast('خطأ في تحميل المنتجات', 'error');
             });
         }
 
         function setupEventListeners() {
             document.getElementById('order-quantity').addEventListener('input', function() {
-                const price = parseFloat(document.getElementById('product-name').value === '' ? 0 : 
-                    products.find(p => p.name === document.getElementById('product-name').value)?.price || 49.99);
+                const productName = document.getElementById('product-name').value;
+                const product = products.find(p => p.name === productName);
+                const price = product ? product.price : 49.99;
                 updateOrderTotal(price);
             });
 
